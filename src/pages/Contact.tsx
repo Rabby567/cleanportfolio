@@ -27,13 +27,24 @@ export default function Contact() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
-    const { error } = await supabase.from("contact_submissions").insert({ name, email, message });
-    if (error) {
-      toast({ title: "Error", description: "Something went wrong.", variant: "destructive" });
-    } else {
-      toast({ title: "Message sent!", description: "Thanks for reaching out." });
-      setName(""); setEmail(""); setMessage("");
+    
+    try {
+      const { data, error } = await supabase.functions.invoke("submit-contact", {
+        body: { name: name.trim(), email: email.trim(), message: message.trim() },
+      });
+
+      if (error) {
+        toast({ title: "Error", description: "Something went wrong. Please try again.", variant: "destructive" });
+      } else if (data?.error) {
+        toast({ title: "Validation Error", description: data.details || data.error, variant: "destructive" });
+      } else {
+        toast({ title: "Message sent!", description: "Thanks for reaching out." });
+        setName(""); setEmail(""); setMessage("");
+      }
+    } catch (err) {
+      toast({ title: "Error", description: "Something went wrong. Please try again.", variant: "destructive" });
     }
+    
     setSubmitting(false);
   };
 

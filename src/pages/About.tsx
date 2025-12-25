@@ -11,7 +11,6 @@ interface Profile {
   hobbies: string | null;
   experience: string | null;
   location: string | null;
-  email: string | null;
 }
 
 const staggerContainer: Variants = {
